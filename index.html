@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLA Foundations — Chapter 6 Workbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3a9e8f; --teal-light: #e8f7f5; --teal-mid: #b2dfd9;
+  --sand: #f5f0e8; --sand-dark: #e8dfc8; --navy: #1d3557;
+  --text: #1a2540; --muted: #7a8599;
+  --correct: #2d9e6b; --correct-bg: #eaf7f1; --wrong: #c0392b; --wrong-bg: #fdf0ee;
+  --radius: 14px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--sand); color: var(--text); min-height: 100vh; }
+.cover { background: linear-gradient(160deg, var(--navy) 0%, #2a6b7c 60%, var(--teal) 100%); color: white; padding: 4rem 2rem 3rem; text-align: center; }
+.cover-logo { font-size: 48px; margin-bottom: 1rem; }
+.cover h1 { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 5vw, 2.8rem); font-weight: 600; line-height: 1.2; margin-bottom: 0.5rem; }
+.cover p { font-size: 1rem; opacity: 0.85; margin-bottom: 2rem; }
+.cover-meta { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+.cover-pill { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 30px; padding: 8px 20px; font-size: 13px; font-weight: 500; }
+.progress-wrap { background: var(--sand-dark); padding: 14px 2rem; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.07); }
+.progress-label { font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.progress-bar { flex: 1; height: 6px; background: #ddd; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), #2a6b7c); border-radius: 3px; transition: width 0.5s ease; }
+.progress-count { font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.section { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.section + .section { border-top: 1px solid var(--sand-dark); }
+.section-eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal); margin-bottom: 6px; }
+.section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+.section-intro { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 1.5rem; }
+.love-item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: 1.5px solid var(--sand-dark); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; background: white; }
+.love-item:hover { border-color: var(--teal-mid); }
+.love-item.yes { background: var(--correct-bg); border-color: #7ecfb3; }
+.love-item.no { background: var(--wrong-bg); border-color: #e8a89e; }
+.love-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+.love-item.yes .love-dot { background: var(--correct); border-color: var(--correct); color: white; }
+.love-item.no .love-dot { background: var(--wrong); border-color: var(--wrong); color: white; }
+.love-text { font-size: 14px; line-height: 1.5; }
+.love-hint { font-size: 11px; color: var(--muted); margin-top: 3px; display: none; }
+.love-item.yes .love-hint { display: block; color: var(--correct); }
+.love-item.no .love-hint { display: block; color: var(--wrong); }
+.quiz-card { background: white; border: 1.5px solid var(--sand-dark); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.5rem; }
+.qnum { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+.qtext { font-size: 16px; font-weight: 500; color: var(--navy); margin-bottom: 1.25rem; line-height: 1.5; }
+.qsubtext { font-size: 13px; color: var(--muted); margin-top: -10px; margin-bottom: 1.25rem; line-height: 1.5; }
+.mc-options { display: flex; flex-direction: column; gap: 8px; }
+.mc-btn { background: var(--sand); border: 1.5px solid var(--sand-dark); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+.mc-btn:hover:not(.locked) { border-color: var(--teal-mid); background: var(--teal-light); }
+.mc-btn.correct { background: var(--correct-bg); border-color: #7ecfb3; color: var(--correct); font-weight: 500; }
+.mc-btn.wrong { background: var(--wrong-bg); border-color: #e8a89e; color: var(--wrong); }
+.mc-btn.reveal-correct { background: var(--correct-bg); border-color: #7ecfb3; color: var(--correct); }
+.mc-btn.locked { cursor: default; }
+.mc-icon { font-size: 16px; flex-shrink: 0; }
+.feedback { display: none; margin-top: 14px; padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; }
+.feedback.show { display: block; }
+.feedback.correct { background: var(--correct-bg); color: #1a6b47; border-left: 3px solid var(--correct); }
+.feedback.wrong { background: var(--wrong-bg); color: #8b2018; border-left: 3px solid var(--wrong); }
+.open-q textarea { width: 100%; min-height: 90px; resize: vertical; font-size: 14px; font-family: 'DM Sans', sans-serif; padding: 12px 14px; border: 1.5px solid var(--sand-dark); border-radius: 10px; background: var(--sand); color: var(--text); line-height: 1.6; transition: border-color 0.2s; }
+.open-q textarea:focus { outline: none; border-color: var(--teal); }
+.prompt-hint { font-size: 12px; color: var(--muted); margin-top: 6px; font-style: italic; }
+.scenario-card { background: var(--sand); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px; line-height: 1.5; }
+.scenario-card strong { color: var(--navy); display: block; margin-bottom: 4px; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.scenario-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sc-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--sand-dark); background: white; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; color: var(--text); transition: all 0.2s; }
+.sc-btn:hover:not(.locked) { border-color: var(--teal); }
+.sc-btn.correct { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); font-weight: 500; }
+.sc-btn.wrong { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+.sc-btn.locked { cursor: default; }
+.wave-divider { text-align: center; padding: 1rem 0 0.5rem; opacity: 0.25; font-size: 22px; }
+.final-card { background: linear-gradient(135deg, var(--navy), #2a6b7c); color: white; border-radius: var(--radius); padding: 2rem; margin-top: 1rem; }
+.final-card h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 8px; }
+.final-card p { font-size: 14px; opacity: 0.85; line-height: 1.6; margin-bottom: 1.5rem; }
+.score-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 30px; padding: 8px 24px; font-size: 15px; font-weight: 500; margin-bottom: 1.5rem; }
+.name-wrap { margin-top: 1.25rem; margin-bottom: 1rem; }
+.name-wrap label { display: block; font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 6px; }
+.name-wrap input { width: 100%; font-size: 15px; font-family: 'DM Sans', sans-serif; padding: 12px 14px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px; background: rgba(255,255,255,0.12); color: white; }
+.name-wrap input::placeholder { color: rgba(255,255,255,0.5); }
+.name-wrap input:focus { outline: none; border-color: rgba(255,255,255,0.6); }
+.submit-btn { background: var(--teal); border: none; border-radius: 10px; padding: 14px 32px; font-size: 15px; font-weight: 500; color: white; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; width: 100%; }
+.submit-btn:hover:not(:disabled) { background: #2d8a7c; }
+.submit-btn:disabled { background: #555; cursor: not-allowed; }
+.submit-status { font-size: 13px; margin-top: 12px; text-align: center; min-height: 20px; }
+.submit-status.sending { color: #8effda; }
+.submit-status.sent { color: #8effda; font-weight: 500; }
+.submit-status.error { color: #ffb3b3; }
+/* Excuse sorter */
+.excuse-sorter { display: flex; flex-direction: column; gap: 8px; }
+.excuse-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--sand-dark); background: white; cursor: pointer; transition: all 0.2s; font-size: 13px; }
+.excuse-item:hover:not(.locked) { border-color: var(--teal-mid); }
+.excuse-item.retired { background: var(--wrong-bg); border-color: #e8a89e; color: var(--wrong); }
+.excuse-item.acceptable { background: var(--correct-bg); border-color: #7ecfb3; color: var(--correct); }
+.excuse-item.locked { cursor: default; }
+.excuse-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.excuse-item.retired .excuse-tag { background: #f8d7d3; color: var(--wrong); }
+.excuse-item.acceptable .excuse-tag { background: #c8edd9; color: var(--correct); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-logo">🌴</div>
+  <h1>FLA Foundations<br>Chapter 6 Workbook</h1>
+  <p>Myths · Excuses · Tracking Mastery</p>
+  <div class="cover-meta">
+    <span class="cover-pill">Phase I — Love</span>
+    <span class="cover-pill">Mindset: Make Every Day Count</span>
+    <span class="cover-pill">Action: Track Before You Eat</span>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <span class="progress-label">Progress</span>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  <span class="progress-count" id="prog-count">0 / 12</span>
+</div>
+
+<!-- PART 1: LOVE CHECK-IN -->
+<div class="section">
+  <div class="section-eyebrow">Part 1 · Mindset</div>
+  <h2 class="section-title">Are you showing yourself love?</h2>
+  <p class="section-intro">Chapter 6's attribute is <strong>Love</strong>. Before diving into myths and excuses, check in with yourself. Tap each statement honestly.</p>
+  <div id="love-list"></div>
+</div>
+
+<div class="wave-divider">~ ~ ~</div>
+
+<!-- PART 2: MYTHS -->
+<div class="section">
+  <div class="section-eyebrow">Part 2 · Myths Debunked</div>
+  <h2 class="section-title">Because the internet is full of bad advice</h2>
+  <p class="section-intro">Let's make sure you know fact from fiction. These myths trip up even experienced dieters — test yourself.</p>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 1 of 12</div>
+    <div class="qtext">The myth "Eat Less, Move More" fails because…</div>
+    <div class="mc-options" id="mc-1">
+      <button class="mc-btn" onclick="checkMC(1,this,false)"><span class="mc-icon">○</span>It's too hard to follow long-term</button>
+      <button class="mc-btn" onclick="checkMC(1,this,true)"><span class="mc-icon">○</span>It oversimplifies the body and can stress metabolism, hormones, and recovery</button>
+      <button class="mc-btn" onclick="checkMC(1,this,false)"><span class="mc-icon">○</span>Exercise has no effect on fat loss</button>
+      <button class="mc-btn" onclick="checkMC(1,this,false)"><span class="mc-icon">○</span>You should never reduce calories</button>
+    </div>
+    <div class="feedback" id="fb-1"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 2 of 12</div>
+    <div class="qtext">True or False: Muscle literally weighs more than fat.</div>
+    <div class="mc-options" id="mc-2">
+      <button class="mc-btn" onclick="checkMC(2,this,false)"><span class="mc-icon">○</span>True — a pound of muscle is heavier than a pound of fat</button>
+      <button class="mc-btn" onclick="checkMC(2,this,true)"><span class="mc-icon">○</span>False — a pound is a pound. Muscle is denser, so it takes up less space</button>
+      <button class="mc-btn" onclick="checkMC(2,this,false)"><span class="mc-icon">○</span>True — that's why the scale goes up when you build muscle</button>
+      <button class="mc-btn" onclick="checkMC(2,this,false)"><span class="mc-icon">○</span>False — fat and muscle weigh the same and take up the same space</button>
+    </div>
+    <div class="feedback" id="fb-2"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 3 of 12</div>
+    <div class="qtext">What does "toning" actually require?</div>
+    <div class="mc-options" id="mc-3">
+      <button class="mc-btn" onclick="checkMC(3,this,false)"><span class="mc-icon">○</span>Light weights and high reps only</button>
+      <button class="mc-btn" onclick="checkMC(3,this,false)"><span class="mc-icon">○</span>Lots of cardio and calorie restriction</button>
+      <button class="mc-btn" onclick="checkMC(3,this,true)"><span class="mc-icon">○</span>Building muscle + lowering body fat — often means lifting heavier, not lighter</button>
+      <button class="mc-btn" onclick="checkMC(3,this,false)"><span class="mc-icon">○</span>A specific high-rep magic rep scheme</button>
+    </div>
+    <div class="feedback" id="fb-3"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 4 of 12</div>
+    <div class="qtext">Why can fasted workouts backfire — especially for women?</div>
+    <div class="mc-options" id="mc-4">
+      <button class="mc-btn" onclick="checkMC(4,this,false)"><span class="mc-icon">○</span>They burn zero fat during the workout</button>
+      <button class="mc-btn" onclick="checkMC(4,this,false)"><span class="mc-icon">○</span>They are too intense without food</button>
+      <button class="mc-btn" onclick="checkMC(4,this,true)"><span class="mc-icon">○</span>More fat burned during the session doesn't equal more fat loss over time, and hormonal disruption is a real risk</button>
+      <button class="mc-btn" onclick="checkMC(4,this,false)"><span class="mc-icon">○</span>Fasted workouts always lead to injury</button>
+    </div>
+    <div class="feedback" id="fb-4"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 5 of 12</div>
+    <div class="qtext">According to FLA, what actually matters most for fat loss — not just "calories in vs. calories out"?</div>
+    <div class="mc-options" id="mc-5">
+      <button class="mc-btn" onclick="checkMC(5,this,false)"><span class="mc-icon">○</span>Eating only whole foods</button>
+      <button class="mc-btn" onclick="checkMC(5,this,true)"><span class="mc-icon">○</span>Consistency, accountability, biofeedback monitoring, and not chronically under-eating</button>
+      <button class="mc-btn" onclick="checkMC(5,this,false)"><span class="mc-icon">○</span>Doing more cardio every week</button>
+      <button class="mc-btn" onclick="checkMC(5,this,false)"><span class="mc-icon">○</span>Cutting carbs and eating after 6pm</button>
+    </div>
+    <div class="feedback" id="fb-5"></div>
+  </div>
+</div>
+
+<div class="wave-divider">~ ~ ~</div>
+
+<!-- PART 3: EXCUSES -->
+<div class="section">
+  <div class="section-eyebrow">Part 3 · Retired vs. Acceptable Excuses</div>
+  <h2 class="section-title">Not all excuses are created equal</h2>
+  <p class="section-intro">FLA makes a clear distinction: <strong>Retired excuses</strong> hand your power away. <strong>Acceptable excuses</strong> own the choice. Sort each one below.</p>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 6 of 12</div>
+    <div class="qtext">Is this a Retired FLA Excuse or an Acceptable (Power Mindset) one?</div>
+    <p class="qsubtext">Tap each excuse to reveal whether it's retired or acceptable.</p>
+    <div class="excuse-sorter" id="excuse-sorter"></div>
+    <div class="feedback" id="fb-6"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 7 of 12</div>
+    <div class="qtext">What makes an "Acceptable" excuse different from a "Retired" one?</div>
+    <div class="mc-options" id="mc-7">
+      <button class="mc-btn" onclick="checkMC(7,this,false)"><span class="mc-icon">○</span>Acceptable excuses are backed by a medical reason</button>
+      <button class="mc-btn" onclick="checkMC(7,this,false)"><span class="mc-icon">○</span>Acceptable excuses mean you genuinely couldn't help it</button>
+      <button class="mc-btn" onclick="checkMC(7,this,true)"><span class="mc-icon">○</span>Acceptable excuses own the choice — "I chose not to" — rather than blaming something external</button>
+      <button class="mc-btn" onclick="checkMC(7,this,false)"><span class="mc-icon">○</span>There are no acceptable excuses in FLA</button>
+    </div>
+    <div class="feedback" id="fb-7"></div>
+  </div>
+</div>
+
+<div class="wave-divider">~ ~ ~</div>
+
+<!-- PART 4: TRACKING MASTERY -->
+<div class="section">
+  <div class="section-eyebrow">Part 4 · Tracking Mastery</div>
+  <h2 class="section-title">Why tracking feels hard — and how to fix it</h2>
+  <p class="section-intro">Most tracking breakdowns come from a handful of predictable patterns. Let's make sure you can spot them.</p>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 8 of 12</div>
+    <div class="qtext">Which of the following is a common tracking pitfall covered in Chapter 6?</div>
+    <div class="mc-options" id="mc-8">
+      <button class="mc-btn" onclick="checkMC(8,this,false)"><span class="mc-icon">○</span>Tracking too many items per meal</button>
+      <button class="mc-btn" onclick="checkMC(8,this,true)"><span class="mc-icon">○</span>Logging at end of day, using multiple apps, and only tracking when it's "perfect"</button>
+      <button class="mc-btn" onclick="checkMC(8,this,false)"><span class="mc-icon">○</span>Weighing food too precisely</button>
+      <button class="mc-btn" onclick="checkMC(8,this,false)"><span class="mc-icon">○</span>Pre-planning meals in advance</button>
+    </div>
+    <div class="feedback" id="fb-8"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 9 of 12</div>
+    <div class="qtext">Alcohol macros on a nutrition label often don't add up correctly. When tracking alcohol, what should you do?</div>
+    <div class="mc-options" id="mc-9">
+      <button class="mc-btn" onclick="checkMC(9,this,false)"><span class="mc-icon">○</span>Just use the carb grams listed on the label</button>
+      <button class="mc-btn" onclick="checkMC(9,this,false)"><span class="mc-icon">○</span>Don't bother tracking alcohol — it's too complex</button>
+      <button class="mc-btn" onclick="checkMC(9,this,true)"><span class="mc-icon">○</span>Look up the actual calories, then divide by 4 for carbs or by 9 for fats to log it accurately</button>
+      <button class="mc-btn" onclick="checkMC(9,this,false)"><span class="mc-icon">○</span>Log it as protein since it has no fat or carbs</button>
+    </div>
+    <div class="feedback" id="fb-9"></div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="qnum">Question 10 of 12</div>
+    <div class="qtext">Which of these is NOT one of the Metabolic Restoration Habits from Chapter 6?</div>
+    <div class="mc-options" id="mc-10">
+      <button class="mc-btn" onclick="checkMC(10,this,false)"><span class="mc-icon">○</span>Strength train and build muscle</button>
+      <button class="mc-btn" onclick="checkMC(10,this,false)"><span class="mc-icon">○</span>Prioritize protein and track food</button>
+      <button class="mc-btn" onclick="checkMC(10,this,true)"><span class="mc-icon">○</span>Do fasted cardio every morning</button>
+      <button class="mc-btn" onclick="checkMC(10,this,false)"><span class="mc-icon">○</span>Improve sleep quality and manage stress</button>
+    </div>
+    <div class="feedback" id="fb-10"></div>
+  </div>
+</div>
+
+<div class="wave-divider">~ ~ ~</div>
+
+<!-- PART 5: REFLECTION -->
+<div class="section">
+  <div class="section-eyebrow">Part 5 · Self-Reflection</div>
+  <h2 class="section-title">Your myths & excuses</h2>
+  <p class="section-intro">Chapter 6's challenge is personal. Time to get honest with yourself — your coach will see this.</p>
+
+  <div class="quiz-card open-q">
+    <div class="qnum">Question 11 of 12</div>
+    <div class="qtext">Which myth from Chapter 6 did you still believe (even a little)?</div>
+    <p class="qsubtext">No judgment — naming it is the first step to letting it go.</p>
+    <textarea id="oa-11" placeholder="I still believed that..." onkeyup="trackOpen(11)"></textarea>
+    <div class="prompt-hint">Think about what you've told yourself about carbs, soreness, eating times, stress, or calories.</div>
+  </div>
+
+  <div class="quiz-card open-q">
+    <div class="qnum">Question 12 of 12</div>
+    <div class="qtext">What is your #1 excuse that gets in the way of tracking — and what's the power mindset reframe?</div>
+    <p class="qsubtext">Write the old excuse AND how you'll own the choice instead.</p>
+    <textarea id="oa-12" placeholder="My old excuse: ... My power reframe: I choose to..." onkeyup="trackOpen(12)"></textarea>
+    <div class="prompt-hint">For every excuse, someone has overcome that same obstacle. What will YOU choose?</div>
+  </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="section">
+  <div class="final-card">
+    <h3>Chapter 6 complete 🌴</h3>
+    <p>Enter your name and hit submit — your coach will receive your full results instantly.</p>
+    <div class="score-badge" id="final-score">Quiz score: — / 9</div>
+    <div class="name-wrap">
+      <label>Your name</label>
+      <input type="text" id="client-name" placeholder="First and last name" />
+    </div>
+    <button class="submit-btn" id="submit-btn" onclick="submitWorkbook()">Send to my coach</button>
+    <div class="submit-status" id="submit-status"></div>
+  </div>
+</div>
+
+<script>
+var quizAnswered = {};
+var openFilled = {};
+var loveState = {};
+var excuseAnswered = {};
+var TOTAL_ITEMS = 12;
+
+function updateProgress() {
+  var done = Object.keys(quizAnswered).length + Object.keys(openFilled).length;
+  var pct = Math.min(100, Math.round(done / TOTAL_ITEMS * 100));
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-count').textContent = done + ' / ' + TOTAL_ITEMS;
+  var correct = 0;
+  for (var k in quizAnswered) { if (quizAnswered[k]) correct++; }
+  document.getElementById('final-score').textContent = 'Quiz score: ' + correct + ' / 9';
+}
+
+var loveQs = [
+  { q: "Am I offering myself patience, just as I would offer someone else?", y: "Keep going — patience is a practice.", n: "Notice where you're being hard on yourself this week." },
+  { q: "Am I speaking to myself with kindness — thoughts, words, actions?", y: "That inner voice matters more than you know.", n: "What would you say to a friend in your shoes?" },
+  { q: "Am I honoring my worth instead of minimizing or criticising myself?", y: "You belong here. Own it.", n: "Your worth is not tied to your results." },
+  { q: "Am I choosing calm over reactivity?", y: "Calm is a superpower on this journey.", n: "Pause before you respond — to yourself and others." },
+  { q: "Am I releasing the past, or am I holding onto things that hurt me?", y: "The past is data — not a sentence.", n: "What are you still carrying that you could put down?" },
+  { q: "Am I protecting what matters — my energy, my boundaries, my heart?", y: "Protecting yourself is not selfish.", n: "Where are you giving too much of yourself away?" },
+  { q: "Am I open to new possibilities, even when they feel uncertain?", y: "Openness is where the transformation lives.", n: "What would it look like to trust the process just a little more?" },
+  { q: "Am I trusting myself on my FLA Journey?", y: "That trust will compound over time.", n: "You don't need certainty — you need one next step." },
+  { q: "Am I staying committed to my growth, even when uncomfortable?", y: "Discomfort means you're growing.", n: "Commitment doesn't require motivation — just showing up." }
+];
+
+function renderLove() {
+  var el = document.getElementById('love-list');
+  el.innerHTML = loveQs.map(function(item, i) {
+    var s = loveState[i] || '';
+    var hint = s === 'yes' ? item.y : s === 'no' ? item.n : '';
+    return '<div class="love-item ' + s + '" onclick="cycleLove(' + i + ')">' +
+      '<div class="love-dot">' + (s === 'yes' ? '✓' : s === 'no' ? '✕' : '') + '</div>' +
+      '<div><div class="love-text">' + item.q + '</div>' +
+      '<div class="love-hint">' + hint + '</div></div></div>';
+  }).join('');
+}
+function cycleLove(i) {
+  var c = loveState[i];
+  loveState[i] = c === 'yes' ? 'no' : c === 'no' ? '' : 'yes';
+  renderLove();
+}
+
+// Excuse sorter data: text, isAcceptable
+var excuseItems = [
+  { text: "I forgot", acceptable: false },
+  { text: "I was too busy", acceptable: false },
+  { text: "It was the weekend", acceptable: false },
+  { text: "I didn't have my scale", acceptable: false },
+  { text: "I watch what I eat", acceptable: false },
+  { text: "I chose not to track today", acceptable: true },
+  { text: "I wanted and chose to eat more", acceptable: true },
+  { text: "I was traveling", acceptable: false },
+  { text: "I chose to rest instead of working out", acceptable: true },
+  { text: "They were bad foods so I didn't track them", acceptable: false }
+];
+
+function renderExcuseSorter() {
+  var el = document.getElementById('excuse-sorter');
+  el.innerHTML = excuseItems.map(function(item, i) {
+    var state = excuseAnswered[i];
+    var cls = state === 'revealed' ? (item.acceptable ? 'acceptable' : 'retired') : '';
+    var tag = state === 'revealed' ? (item.acceptable ? '<span class="excuse-tag">Power Mindset ✓</span>' : '<span class="excuse-tag">Retired ✕</span>') : '';
+    return '<div class="excuse-item ' + cls + (state ? ' locked' : '') + '" onclick="revealExcuse(' + i + ')">' +
+      tag + '<span>' + item.text + '</span></div>';
+  }).join('');
+}
+
+function revealExcuse(i) {
+  if (excuseAnswered[i]) return;
+  excuseAnswered[i] = 'revealed';
+  renderExcuseSorter();
+  var allDone = Object.keys(excuseAnswered).length === excuseItems.length;
+  if (allDone && !quizAnswered[6]) {
+    var correct = excuseItems.filter(function(item, idx) { return excuseAnswered[idx]; }).length;
+    quizAnswered[6] = true;
+    var fb = document.getElementById('fb-6');
+    fb.innerHTML = 'All excuses revealed! Green = Power Mindset (you own the choice). Red = Retired (hands your power away). Notice which ones you\'ve used.';
+    fb.className = 'feedback show correct';
+    updateProgress();
+  }
+}
+
+var MC_FB = {
+  1: { c: "Correct. <strong>Eat Less, Move More</strong> oversimplifies the body. The true fix: fuel smarter, train intentionally, recover deeply.", w: "The real problem is that it <strong>oversimplifies how the body works</strong> — stressing metabolism, hormones, and recovery." },
+  2: { c: "Correct! <strong>A pound is a pound.</strong> Muscle is denser, so it takes up less space. Two people can weigh the same and look completely different.", w: "False — <strong>a pound is a pound.</strong> Muscle is denser, meaning it takes up less space, but it doesn't literally weigh more." },
+  3: { c: "Exactly. <strong>'Toning' = building muscle + lowering body fat.</strong> That often means lifting heavier and training smarter.", w: "Toning is actually <strong>building muscle + lowering body fat</strong>. No magic rep scheme — often requires lifting heavier, not lighter." },
+  4: { c: "Right. You may burn more fat during the session, but it <strong>doesn't always equal more fat loss over time</strong> — and hormonal disruption is a real risk.", w: "Fasted workouts can backfire because <strong>more fat burned during the workout ≠ more fat loss overall</strong>, and there are real hormonal risks." },
+  5: { c: "Correct! FLA goes beyond calories in/out: <strong>consistency, accountability, biofeedback, and not chronically under-eating</strong> are all part of the picture.", w: "FLA's approach includes <strong>consistency, accountability, goal with a date, biofeedback monitoring, and avoiding chronic under-eating</strong> — not just calories." },
+  7: { c: "Exactly. <strong>Power mindset = owning the choice.</strong> 'I chose not to' puts you in control. External blame keeps you stuck.", w: "The difference is <strong>ownership</strong>. Acceptable excuses say 'I chose not to' — they keep you in your power instead of blaming something external." },
+  8: { c: "Correct. The big pitfalls: <strong>logging late, using multiple apps, only tracking 'perfect' days, and letting one missed day snowball.</strong>", w: "Key pitfalls include <strong>logging at end of day, using multiple tracking apps, only tracking when perfect</strong>, and letting one missed day become two." },
+  9: { c: "Right. Alcohol labels lie. <strong>Look at total calories → divide by 4 for carbs or divide by 9 for fats</strong> to log it accurately.", w: "The label macros for alcohol are inaccurate. <strong>Find the actual calorie count, then divide by 4 (carbs) or 9 (fats)</strong> to log it correctly." },
+  10: { c: "Correct! <strong>Fasted cardio is NOT a Metabolic Restoration Habit.</strong> The habits are: track food, prioritize protein, strength train, move daily, improve sleep/stress, don't under-eat, stay hydrated.", w: "Fasted cardio is NOT listed. The actual habits are: <strong>track food, prioritize protein, strength train, daily movement, sleep/stress, avoid chronic under-eating, stay hydrated.</strong>" }
+};
+
+function checkMC(qid, btn, correct) {
+  var container = document.getElementById('mc-' + qid);
+  if (container.querySelector('.locked')) return;
+  var btns = container.querySelectorAll('.mc-btn');
+  btns.forEach(function(b) { b.classList.add('locked'); });
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  btn.querySelector('.mc-icon').textContent = correct ? '✓' : '✕';
+  if (!correct) {
+    btns.forEach(function(b) {
+      if (b.getAttribute('onclick').indexOf(',true)') > -1) {
+        b.classList.add('reveal-correct');
+        b.querySelector('.mc-icon').textContent = '✓';
+      }
+    });
+  }
+  var fb = document.getElementById('fb-' + qid);
+  fb.innerHTML = correct ? MC_FB[qid].c : MC_FB[qid].w;
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+  quizAnswered[qid] = correct;
+  updateProgress();
+}
+
+function trackOpen(qid) {
+  var val = document.getElementById('oa-' + qid).value.trim();
+  if (val.length > 10 && !openFilled[qid]) { openFilled[qid] = true; updateProgress(); }
+}
+
+function submitWorkbook() {
+  var name = document.getElementById('client-name').value.trim();
+  if (!name) {
+    document.getElementById('submit-status').className = 'submit-status error';
+    document.getElementById('submit-status').textContent = 'Please enter your name before submitting.';
+    return;
+  }
+
+  var correct = 0;
+  for (var k in quizAnswered) { if (quizAnswered[k]) correct++; }
+
+  var loveAnswers = loveQs.map(function(item, i) {
+    var s = loveState[i] || 'not answered';
+    return item.q + ': ' + (s === 'yes' ? 'YES' : s === 'no' ? 'NOT YET' : 'not answered');
+  }).join('\n');
+
+  var excuseResults = excuseItems.map(function(item, i) {
+    return '"' + item.text + '" → ' + (excuseAnswered[i] ? (item.acceptable ? 'Power Mindset' : 'Retired') : 'not revealed');
+  }).join('\n');
+
+  var quizResults =
+    'Q1 (Eat Less Move More myth): ' + (quizAnswered[1] === true ? 'correct' : quizAnswered[1] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q2 (Muscle weighs more myth): ' + (quizAnswered[2] === true ? 'correct' : quizAnswered[2] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q3 (Toning myth): ' + (quizAnswered[3] === true ? 'correct' : quizAnswered[3] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q4 (Fasted workouts myth): ' + (quizAnswered[4] === true ? 'correct' : quizAnswered[4] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q5 (Beyond cals in/out): ' + (quizAnswered[5] === true ? 'correct' : quizAnswered[5] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q6 (Excuse sorter): ' + (quizAnswered[6] === true ? 'completed' : 'not completed') + '\n' +
+    'Q7 (Power mindset excuses): ' + (quizAnswered[7] === true ? 'correct' : quizAnswered[7] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q8 (Tracking pitfalls): ' + (quizAnswered[8] === true ? 'correct' : quizAnswered[8] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q9 (Alcohol tracking): ' + (quizAnswered[9] === true ? 'correct' : quizAnswered[9] === false ? 'wrong' : 'not answered') + '\n' +
+    'Q10 (Metabolic habits): ' + (quizAnswered[10] === true ? 'correct' : quizAnswered[10] === false ? 'wrong' : 'not answered');
+
+  var btn = document.getElementById('submit-btn');
+  var status = document.getElementById('submit-status');
+  btn.disabled = true;
+  status.className = 'submit-status sending';
+  status.textContent = 'Sending to your coach...';
+
+  fetch('https://formspree.io/f/mredkkpj', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      client_name: name,
+      chapter: 'Chapter 6 — Myths & Excuses',
+      date: new Date().toLocaleDateString(),
+      quiz_score: correct + ' / 9',
+      quiz_results: quizResults,
+      love_checkin: loveAnswers,
+      excuse_sorter: excuseResults,
+      myth_i_believed: document.getElementById('oa-11').value.trim() || '(not answered)',
+      my_excuse_and_reframe: document.getElementById('oa-12').value.trim() || '(not answered)'
+    })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      status.className = 'submit-status sent';
+      status.textContent = '✓ Submitted! Your coach will review your answers.';
+      btn.textContent = 'Submitted ✓';
+    } else {
+      throw new Error('Form error');
+    }
+  })
+  .catch(function() {
+    btn.disabled = false;
+    status.className = 'submit-status error';
+    status.textContent = 'Something went wrong. Please try again.';
+  });
+}
+
+renderLove();
+renderExcuseSorter();
+updateProgress();
+</script>
+</body>
+</html>
